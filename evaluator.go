@@ -244,9 +244,9 @@ func Eval(expr string) (result *big.Rat, err error) {
 func Evaluate(expr string) (ret bool, err error) {
     rat, err := Eval(expr)
     if err !=nil {
-        ret := rat
+        ret = false
     }else{
-        ret := RatToBool(rat)
+        ret = RatToBool(rat)
     }
     return ret, err
 }
@@ -282,12 +282,11 @@ func FloatToBigrat(float float64) *big.Rat {
 	bigrat := new(big.Rat)
 	// no error scenario could be imagined in testing, so discard err
 	fmt.Sscan(float_string, bigrat)
-os.Exit(0)
 	return bigrat
 }
 
 
-func RatToBool(bigrat *big.Rat) bool{
+func BigratToBool(bigrat *big.Rat) bool{
    cmp := bigrat.Cmp(big.NewRat(0,1))
    if cmp ==0{
         return false
