@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-    "os"
 
 	"github.com/ricolau/evaluator/stack"
 )
@@ -246,7 +245,7 @@ func Evaluate(expr string) (ret bool, err error) {
     if err !=nil {
         ret = false
     }else{
-        ret = RatToBool(rat)
+        ret = BigratToBool(rat)
     }
     return ret, err
 }
