@@ -15,7 +15,6 @@ import (
 	"github.com/ricolau/evaluator/stack"
 )
 
-
 var whitespace_rx = regexp.MustCompile(`\s+`)
 
 // Unary minus is appeared at the following positions.
@@ -25,7 +24,7 @@ var unary_minus_rx = regexp.MustCompile(`((?:^|[-+*/<>(])\s*)-`)
 var fp_rx = regexp.MustCompile(`(\d+(?:\.\d+)?)`) // simple fp number
 
 // Operator '@' means unary minus
-var operators = "-+**/<>@||&&"
+var operators = "-+**/<>@||&&==<=>="
 
 // prec returns the operator's precedence
 func prec(op string) (result int) {
@@ -37,11 +36,11 @@ func prec(op string) (result int) {
 		result = 3
 	} else if op == "@" {
 		result = 4
-	}else if op =="&&"{
-        result = -1
-    }else if op=="||"{
-        result = -2
-    }
+	} else if op == "&&" {
+		result = -1
+	} else if op == "||" {
+		result = -2
+	}
 	return
 }
 
@@ -171,22 +170,39 @@ func evaluatePostfix(postfix []string) (*big.Rat, error) {
 					stack.Push(new(big.Rat))
 				}
 
+			case "==":
+				if op1.(*big.Rat).Cmp(op2.(*big.Rat)) == 0 {
+					stack.Push(big.NewRat(1, 1))
+				} else {
+					stack.Push(new(big.Rat))
+				}
+			case ">=":
+				if op1.(*big.Rat).Cmp(op2.(*big.Rat)) >= 0 {
+					stack.Push(big.NewRat(1, 1))
+				} else {
+					stack.Push(new(big.Rat))
+				}
+			case "<=":
+				if op1.(*big.Rat).Cmp(op2.(*big.Rat)) <= 0 {
+					stack.Push(big.NewRat(1, 1))
+				} else {
+					stack.Push(new(big.Rat))
+				}
 			case "&&":
-                tmp_false := big.NewRat(0,1)
-				if op1.(*big.Rat).Cmp(tmp_false) != 0 && op2.(*big.Rat).Cmp(tmp_false)!=0 {
+				tmp_false := big.NewRat(0, 1)
+				if op1.(*big.Rat).Cmp(tmp_false) != 0 && op2.(*big.Rat).Cmp(tmp_false) != 0 {
 					stack.Push(big.NewRat(1, 1))
 				} else {
 					stack.Push(tmp_false)
 				}
 
 			case "||":
-                tmp_false := big.NewRat(0,1)
-				if op1.(*big.Rat).Cmp(tmp_false) != 0 || op2.(*big.Rat).Cmp(tmp_false)!=0 {
+				tmp_false := big.NewRat(0, 1)
+				if op1.(*big.Rat).Cmp(tmp_false) != 0 || op2.(*big.Rat).Cmp(tmp_false) != 0 {
 					stack.Push(big.NewRat(1, 1))
 				} else {
 					stack.Push(tmp_false)
 				}
-
 
 			case "@":
 				result := dummy.Mul(big.NewRat(-1, 1), op2.(*big.Rat))
@@ -236,18 +252,18 @@ func Eval(expr string) (result *big.Rat, err error) {
 
 	tokens := tokenise(expr)
 	postfix := convert2postfix(tokens)
-	ret,err :=evaluatePostfix(postfix)
-    return ret,err
+	ret, err := evaluatePostfix(postfix)
+	return ret, err
 }
 
 func Evaluate(expr string) (ret bool, err error) {
-    rat, err := Eval(expr)
-    if err !=nil {
-        ret = false
-    }else{
-        ret = BigratToBool(rat)
-    }
-    return ret, err
+	rat, err := Eval(expr)
+	if err != nil {
+		ret = false
+	} else {
+		ret = BigratToBool(rat)
+	}
+	return ret, err
 }
 
 // BigratToInt converts a *big.Rat to an int64 (with truncation); it
@@ -284,12 +300,11 @@ func FloatToBigrat(float float64) *big.Rat {
 	return bigrat
 }
 
-
-func BigratToBool(bigrat *big.Rat) bool{
-   cmp := bigrat.Cmp(big.NewRat(0,1))
-   if cmp ==0{
-        return false
-   }else{
-        return true
-   }
+func BigratToBool(bigrat *big.Rat) bool {
+	cmp := bigrat.Cmp(big.NewRat(0, 1))
+	if cmp == 0 {
+		return false
+	} else {
+		return true
+	}
 }
